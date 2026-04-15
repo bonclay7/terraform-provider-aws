@@ -411,7 +411,7 @@ func (m scraperLoggingDestinationModel) Expand(ctx context.Context) (any, diag.D
 
 	return &awstypes.ScraperLoggingDestinationMemberCloudWatchLogs{
 		Value: awstypes.CloudWatchLogDestination{
-			LogGroupArn: aws.String(cwData.LogGroupARN.ValueString()),
+			LogGroupArn: cwData.LogGroupARN.ValueStringPointer(),
 		},
 	}, diags
 }

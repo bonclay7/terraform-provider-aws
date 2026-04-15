@@ -40,12 +40,6 @@ func (p *servicePackage) FrameworkResources(ctx context.Context) []*inttypes.Ser
 			Region:   unique.Make(inttypes.ResourceRegionDefault()),
 		},
 		{
-			Factory:  newScraperLoggingConfigurationResource,
-			TypeName: "aws_prometheus_scraper_logging_configuration",
-			Name:     "ScraperLoggingConfiguration",
-			Region:   unique.Make(inttypes.ResourceRegionDefault()),
-		},
-		{
 			Factory:  newResourcePolicyResource,
 			TypeName: "aws_prometheus_resource_policy",
 			Name:     "Resource Policy",
@@ -59,6 +53,12 @@ func (p *servicePackage) FrameworkResources(ctx context.Context) []*inttypes.Ser
 				IdentifierAttribute: names.AttrARN,
 			}),
 			Region: unique.Make(inttypes.ResourceRegionDefault()),
+		},
+		{
+			Factory:  newScraperLoggingConfigurationResource,
+			TypeName: "aws_prometheus_scraper_logging_configuration",
+			Name:     "ScraperLoggingConfiguration",
+			Region:   unique.Make(inttypes.ResourceRegionDefault()),
 		},
 		{
 			Factory:  newWorkspaceConfigurationResource,
