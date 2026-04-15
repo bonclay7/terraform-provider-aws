@@ -28,7 +28,7 @@ resource "aws_prometheus_scraper_logging_configuration" "example" {
 }
 ```
 
-### With Scraper Components
+### With Specific Scraper Components
 
 ```terraform
 resource "aws_cloudwatch_log_group" "example" {
@@ -38,22 +38,12 @@ resource "aws_cloudwatch_log_group" "example" {
 resource "aws_prometheus_scraper_logging_configuration" "example" {
   scraper_id = aws_prometheus_scraper.example.id
 
+  scraper_components = ["COLLECTOR", "EXPORTER"]
+
   logging_destination {
     cloudwatch_logs {
       log_group_arn = "${aws_cloudwatch_log_group.example.arn}:*"
     }
-  }
-
-  scraper_components {
-    type = "COLLECTOR"
-  }
-
-  scraper_components {
-    type = "EXPORTER"
-  }
-
-  scraper_components {
-    type = "SERVICE_DISCOVERY"
   }
 }
 ```
@@ -68,7 +58,7 @@ This resource supports the following arguments:
 The following arguments are optional:
 
 * `region` - (Optional) Region where this resource will be [managed](https://docs.aws.amazon.com/general/latest/gr/rande.html#regional-endpoints). Defaults to the Region set in the [provider configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#aws-configuration-reference).
-* `scraper_components` - (Optional) Set of configuration blocks for the scraper components to enable logging for. See [`scraper_components`](#scraper_components). If not specified, all components are logged.
+* `scraper_components` - (Optional, Computed) Set of scraper component types to enable logging for. Valid values: `COLLECTOR`, `EXPORTER`, `SERVICE_DISCOVERY`. If not specified, all components are logged.
 
 ### `logging_destination`
 
@@ -77,18 +67,6 @@ The following arguments are optional:
 #### `cloudwatch_logs`
 
 * `log_group_arn` - (Required) The ARN of the CloudWatch log group to which scraper logs will be sent. The ARN must end with `:*`.
-
-### `scraper_components`
-
-* `type` - (Required) The type of scraper component to configure for logging. Valid values: `COLLECTOR`, `EXPORTER`, `SERVICE_DISCOVERY`.
-
-The following arguments are optional:
-
-* `config` - (Optional) Configuration block for component-specific settings. See [`config`](#config).
-
-#### `config`
-
-* `options` - (Optional) A map of configuration options for the scraper component.
 
 ## Attribute Reference
 

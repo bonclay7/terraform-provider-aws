@@ -74,6 +74,8 @@ func TestAccAMPScraperLoggingConfiguration_scraperComponents(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckScraperLoggingConfigurationExists(ctx, t, resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "scraper_components.#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "scraper_components.*", "COLLECTOR"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "scraper_components.*", "EXPORTER"),
 				),
 			},
 			{
@@ -192,18 +194,12 @@ resource "aws_cloudwatch_log_group" "test" {
 resource "aws_prometheus_scraper_logging_configuration" "test" {
   scraper_id = aws_prometheus_scraper.test.id
 
+  scraper_components = ["COLLECTOR", "EXPORTER"]
+
   logging_destination {
     cloudwatch_logs {
       log_group_arn = "${aws_cloudwatch_log_group.test.arn}:*"
     }
-  }
-
-  scraper_components {
-    type = "COLLECTOR"
-  }
-
-  scraper_components {
-    type = "EXPORTER"
   }
 }
 `, rName))
