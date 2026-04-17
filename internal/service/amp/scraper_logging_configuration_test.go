@@ -17,6 +17,20 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/names"
 )
 
+func testAccPreCheckScraperLoggingConfiguration(ctx context.Context, t *testing.T) {
+	conn := acctest.ProviderMeta(ctx, t).AMPClient(ctx)
+
+	var input amp.ListScrapersInput
+	_, err := conn.ListScrapers(ctx, &input)
+
+	if acctest.PreCheckSkipError(err) {
+		t.Skipf("skipping acceptance testing: %s", err)
+	}
+	if err != nil {
+		t.Fatalf("unexpected PreCheck error: %s", err)
+	}
+}
+
 func TestAccAMPScraperLoggingConfiguration_basic(t *testing.T) {
 	ctx := acctest.Context(t)
 	var v amp.DescribeScraperLoggingConfigurationOutput
@@ -27,7 +41,7 @@ func TestAccAMPScraperLoggingConfiguration_basic(t *testing.T) {
 	acctest.ParallelTest(ctx, t, resource.TestCase{
 		PreCheck: func() {
 			acctest.PreCheck(ctx, t)
-			acctest.PreCheckPartitionHasService(t, names.AMPEndpointID)
+			testAccPreCheckScraperLoggingConfiguration(ctx, t)
 		},
 		ErrorCheck:               acctest.ErrorCheck(t, names.AMPServiceID),
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories,
@@ -63,7 +77,7 @@ func TestAccAMPScraperLoggingConfiguration_scraperComponents(t *testing.T) {
 	acctest.ParallelTest(ctx, t, resource.TestCase{
 		PreCheck: func() {
 			acctest.PreCheck(ctx, t)
-			acctest.PreCheckPartitionHasService(t, names.AMPEndpointID)
+			testAccPreCheckScraperLoggingConfiguration(ctx, t)
 		},
 		ErrorCheck:               acctest.ErrorCheck(t, names.AMPServiceID),
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories,
@@ -74,8 +88,8 @@ func TestAccAMPScraperLoggingConfiguration_scraperComponents(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckScraperLoggingConfigurationExists(ctx, t, resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "scraper_components.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "scraper_components.*", "COLLECTOR"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "scraper_components.*", "EXPORTER"),
+					resource.TestCheckResourceAttr(resourceName, "scraper_components.0.type", "COLLECTOR"),
+					resource.TestCheckResourceAttr(resourceName, "scraper_components.1.type", "EXPORTER"),
 				),
 			},
 			{
@@ -84,6 +98,7 @@ func TestAccAMPScraperLoggingConfiguration_scraperComponents(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateIdFunc:                    acctest.AttrImportStateIdFunc(resourceName, "scraper_id"),
 				ImportStateVerifyIdentifierAttribute: "scraper_id",
+				ImportStateVerifyIgnore:              []string{"scraper_components"},
 			},
 		},
 	})
@@ -98,7 +113,7 @@ func TestAccAMPScraperLoggingConfiguration_disappears(t *testing.T) {
 	acctest.ParallelTest(ctx, t, resource.TestCase{
 		PreCheck: func() {
 			acctest.PreCheck(ctx, t)
-			acctest.PreCheckPartitionHasService(t, names.AMPEndpointID)
+			testAccPreCheckScraperLoggingConfiguration(ctx, t)
 		},
 		ErrorCheck:               acctest.ErrorCheck(t, names.AMPServiceID),
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories,
@@ -194,7 +209,13 @@ resource "aws_cloudwatch_log_group" "test" {
 resource "aws_prometheus_scraper_logging_configuration" "test" {
   scraper_id = aws_prometheus_scraper.test.id
 
-  scraper_components = ["COLLECTOR", "EXPORTER"]
+  scraper_components {
+    type = "COLLECTOR"
+  }
+
+  scraper_components {
+    type = "EXPORTER"
+  }
 
   logging_destination {
     cloudwatch_logs {
