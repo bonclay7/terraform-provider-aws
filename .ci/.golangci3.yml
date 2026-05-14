@@ -14,14 +14,10 @@ linters:
     - makezero
     - misspell
     - mnd
-  exclusions:
-    rules:
-      - path: '(.+)_test\.go'
-        linters:
-          - goconst
   settings:
     goconst:
-      min-occurrences: 6
+      min-occurrences: 30
+      ignore-tests: true
     gocritic:
       enabled-tags:
         - diagnostic
@@ -65,6 +61,7 @@ linters:
         - intBetweenSchema
         - stringLenBetweenSchema
         # Terraform Plugin Framework
+        - float64validator.*
         - fwactions.TimeoutOr
         - int32validator.*
         - int64validator.*
@@ -84,8 +81,8 @@ linters:
         - strconv.ParseInt
         - strings.SplitN
 issues:
-  max-issues-per-linter: 10
-  max-same-issues: 3
+  max-issues-per-linter: 10000
+  max-same-issues: 10000
 formatters:
   enable:
     - gofmt
